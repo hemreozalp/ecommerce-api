@@ -9,6 +9,8 @@ import com.ecommerce.product_service.repository.CategoryRepository;
 import com.ecommerce.product_service.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,23 +39,27 @@ public class ProductService {
         return ProductMapper.toResponse(saved);
     }
 
+    @Cacheable(value = "allProducts", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
         return productRepository.findAll(pageable)
                 .map(ProductMapper::toResponse);
     }
 
+    @Cacheable(value = "products", key = "#id")
     public ProductResponse getProductById(Long id) {
         Product product = findProductById(id);
         logger.info("Fetching product with ID: {}", id);
         return ProductMapper.toResponse(product);
     }
 
+    @Cacheable(value = "categoryProducts", key = "#categoryId + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<ProductResponse> getProductsByCategoryId(Long categoryId, Pageable pageable) {
         Category category = getCategoryById(categoryId);
         return productRepository.findByCategory(category, pageable)
                 .map(ProductMapper::toResponse);
     }
 
+    @CacheEvict(value = "products", key = "#id")
     public ProductResponse updateProduct(Long id, ProductRequest request) {
         Product existing = findProductById(id);
 
@@ -70,6 +76,7 @@ public class ProductService {
         return ProductMapper.toResponse(updated);
     }
 
+    @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(Long id) {
         Product existing = findProductById(id);
         productRepository.delete(existing);
