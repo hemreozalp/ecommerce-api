@@ -1,10 +1,14 @@
 package com.ecommerce.product_service.service;
 
+import com.ecommerce.product_service.dto.CategoryRequest;
+import com.ecommerce.product_service.dto.CategoryResponse;
 import com.ecommerce.product_service.model.Category;
+import com.ecommerce.product_service.mapper.CategoryMapper;
 import com.ecommerce.product_service.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -15,31 +19,41 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public Category createCategory(Category category){
-        if (categoryRepository.existsByName(category.getName())){
-            throw new IllegalArgumentException("Category already exist: " + category.getName());
+    public CategoryResponse createCategory(CategoryRequest request) {
+        if (categoryRepository.existsByName(request.getName())) {
+            throw new IllegalArgumentException("Category already exist: " + request.getName());
         }
-        return categoryRepository.save(category);
+        Category category = CategoryMapper.toEntity(request);
+        Category saved = categoryRepository.save(category);
+        return CategoryMapper.toResponse(saved);
     }
 
-    public List<Category> getAllCategories(){
-        return categoryRepository.findAll();
+    public List<CategoryResponse> getAllCategories() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(CategoryMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public Category getCategoryById(Long id){
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+    public CategoryResponse getCategoryById(Long id) {
+        Category category = findCategoryById(id);
+        return CategoryMapper.toResponse(category);
     }
 
-    public Category updateCategory(Long id, Category category){
-        Category existing = getCategoryById(id);
-
-        existing.setName(category.getName());
-        return categoryRepository.save(existing);
+    public CategoryResponse updateCategory(Long id, CategoryRequest request) {
+        Category existing = findCategoryById(id);
+        existing.setName(request.getName());
+        Category updated = categoryRepository.save(existing);
+        return CategoryMapper.toResponse(updated);
     }
 
-    public void deleteCategory(Long id){
-        Category existing = getCategoryById(id);
+    public void deleteCategory(Long id) {
+        Category existing = findCategoryById(id);
         categoryRepository.delete(existing);
+    }
+
+    private Category findCategoryById(Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found: " + id));
     }
 }
