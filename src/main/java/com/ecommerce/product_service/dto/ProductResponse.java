@@ -11,6 +11,23 @@ public class ProductResponse {
     private int stock;
     private CategoryResponse category;
 
+    public ProductResponse() {
+    }
+
+    public ProductResponse(Long id,
+                           String name,
+                           String description,
+                           BigDecimal price,
+                           int stock,
+                           CategoryResponse category) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+        this.category = category;
+    }
+
     public Long getId() {
         return id;
     }

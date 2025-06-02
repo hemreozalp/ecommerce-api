@@ -24,6 +24,21 @@ public class ProductRequest {
     @NotNull(message = "Category ID is mandatory")
     private Long categoryId;
 
+    public ProductRequest() {
+    }
+
+    public ProductRequest(String name,
+                          String description,
+                          BigDecimal price,
+                          int stock,
+                          Long categoryId) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+        this.categoryId = categoryId;
+    }
+
     public String getName() {
         return name;
     }

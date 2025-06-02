@@ -29,11 +29,13 @@ public class Product {
     public Product() {
     }
 
-    public Product(String name,
+    public Product(Long id,
+                   String name,
                    String description,
                    BigDecimal price,
                    Integer stock,
                    Category category) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
